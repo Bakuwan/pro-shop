@@ -1,5 +1,41 @@
-<p>{{ app_name }}</p>
-<h5>Nama: </h5>
-<p>{{ name }}</p> 
-<h5>Class: </h5>
-<p>{{ class }}</p> 
+{% extends 'base.html' %}
+{% block content %}
+<h1>Welcome to Pro Shop</h1>
+
+<h5>Name:</h5>
+<p>{{ name }}</p>
+
+<h5>Class:</h5>
+<p>{{ class }}</p>
+
+{% if not products %}
+<p>Currently, there are no products available in Pro Shop.</p>
+{% else %}
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for product in products %}
+    <tr>
+      <td>{{ product.name }}</td>
+      <td>{{ product.price }}</td>
+      <td>{{ product.description }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<br />
+
+<a href="{% url 'main:create_product_entry' %}">
+  <button>Add New Product</button>
+</a>
+
+{% endblock content %}
+
