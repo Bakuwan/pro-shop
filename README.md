@@ -1,6 +1,9 @@
 # Pro Shop
 
 Repositori ini berisi aplikasi web berbasis Django untuk mengelola dan menampilkan katalog produk golf. Aplikasi ini dikembangkan sebagai bagian dari tugas mata kuliah PBP.
+
+http://fadhli-raihan-proshop.pbp.cs.ui.ac.id/
+
 <details>
     <summary>Tugas 2: Implementasi Model-View-Template (MVT) pada Django</summary>
 
@@ -109,7 +112,7 @@ Repositori ini berisi aplikasi web berbasis Django untuk mengelola dan menampilk
 16. Sekarang aplikasi dapat diakses dengan url `fadhli-raihan-proshop.pbp.cs.ui.ac.id`
 
 ## Bagan request client ke web aplikasi berbasis Django
-![alt text](image-1.png)
+![alt text](image/image-1.png)
 
 1. Saat user mengirimkan request http ke server PWS, request tersebut akan diteruskan ke server WSGI
 2. Server WSGI mengarahkan request ke aplikasi Django
@@ -378,7 +381,16 @@ git push pws master
 ```
 
 ### Screenshot hasil akses URL pada Postman
+1. XML
+![alt text](image/ss_xml.png)
 
+2. JSON
+![alt text](image/ss_json.png)
 
+3. XML by ID
+![alt text](image/ss_xmlbyid.png)
+
+4. JSON by ID
+![alt text](image/ss_jsonbyid.png)
 
 </details>
