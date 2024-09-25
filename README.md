@@ -394,3 +394,334 @@ git push pws master
 ![alt text](image/ss_jsonbyid.png)
 
 </details>
+
+<details>
+<summary>Tugas 4: Implementasi Autentikas, Session, dan Cookies pada Django</summary>
+
+## Perbedaan antara `HttpResponseRedirect()` dan `redirect()`
+
+Keduanya digunakan untuk mengarahkan user ke URL lain, tetapi ada perbedaan kecil di antara keduanya. Untuk menggunakan `HttpResponseRedirect()` kita harus memberikan URL lengkap dalam bentuk string, sedangkan `redirect()` lebih fleksibel karena kita bisa menggunakan pola URL yang didefinisikan di `urls.py`
+
+## Jelaskan cara kerja penghubungan `product` dan `user`
+
+Pada tugas 4 ini digunakan `ForeignKey` untuk menghubungkan `product` dan `user`
+
+1. Import model `User` dari Django
+2. Tambahkan field `ForeignKey` ke model `Product` dan hubungkan ke `User`
+
+```python
+import uuid
+from django.db import models
+from django.contrib.auth.models import User
+
+class ProductEntry(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # tambahkan baris ini
+    name = models.CharField(max_length=255)
+    price = models.IntegerField(default=0)
+    description = models.TextField(default="")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+```
+`ForeignKey` digunakan untuk hubungan one-to-many dimana satu user dapat memiliki banyak produk. Untuk hubungan tipe lain kita dapat menggunakan `OneToOneField` dan `ManyToManyField`
+
+3. Ubah potongan kode pada fungsi `create_product_entry` di `views.py`
+```python
+def create_product_entry(request):
+    form = ProductForm(request.POST or None)
+
+    if form.is_valid() and request.method == "POST":
+        product_entry = form.save(commit=False)
+        product_entry.user = request.user
+        product_entry.save()
+        return redirect('main:show_main')
+
+    context = {'form': form}
+    return render(request, "create_product_entry.html", context)
+```
+Parameter `commit=False` digunakan agar kita bisa memodifikasi objek sebelum disimpan di database.
+
+## Apa perbedaan antara authentication dan authorization, apakah yang dilakukan saat pengguna login? Jelaskan bagaimana Django mengimplementasikan kedua konsep tersebut.
+Authentication: Memverifikasi identitas pengguna, biasanya menggunakan username dan password.
+Authorization: Memastikan pengguna memiliki otorisasi untuk mengakses halaman tertentu atau melakukan tindakan tertentu.
+
+Saat pengguna login, authentication terjadi lebih dahulu untuk memverifikasi identitas mereka. Jika berhasil, pengguna akan diberi authorization untuk mengakses hal-hal sesuai dengan otorisasi yang dimiliki.
+
+Authentication pada Django dapat dilakukan dengan fungsi bawaan `authenticate()` yang biasa dipanggil di view login untuk mencocokkan username dan password dengan data di database. Setelah berhasil login, informasi sesi disimpan dalam cookies di browser user. Django menyediakan fungsi `login()` untuk mencatat sesi user dan `logout()` untuk menghapus sesi user.
+
+Authorization pada Django menggunakan permissions dan groups. Kita juga bisa menggunakan decorator `@login_required` untuk memastikan hanya pengguna yang sudah login yang dapat mengakses `view` tertentu. 
+
+## Bagaimana Django mengingat pengguna yang telah login? Jelaskan kegunaan lain dari cookies dan apakah semua cookies aman digunakan?
+
+Django menggunakan cookies dan sessions untuk mengingat pengguna yang telah login.
+
+Kegunaan lain cookies :
+1. Menyimpan preferensi pengguna
+2. Melacak aktivitas pengguna
+3. Mengelola session
+
+Tidak semua cookies aman digunakan. Terdapat beberapa ancaman keamanan yang menggunakan cookies:
+1. Session Hijacking
+Penyerang mencuri session ID yang disimpan di cookie untuk menyamar sebagai pengguna yang sah
+2. Cross Site Scripting
+Penyerang menginjek skrip ke dalam aplikasi web untuk membaca dan mencuri cookies yang menyimpan session ID
+
+Untuk memastikan keamanan cookies, Django mendukung pengaturan seperti `SESSION_COOKIE_SECURE` dan `CSRF_COOKIE_SECURE`
+
+## Step-by-step implementasi checklist
+### Implementasi fungsi registrasi, login, dan logout
+1. Membuat form dan fungsi registrasi di `views.py`
+```python
+from django.contrib.auth.forms import UserCreationForm, 
+from django.contrib import messages
+
+def register(request):
+    form = UserCreationForm()
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been successfully created!')
+            return redirect('main:login')
+    context = {'form':form}
+    return render(request, 'register.html', context)
+```
+2. Membuat template baru bernama `register.html`
+```html
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Register</title>
+{% endblock meta %}
+
+{% block content %}
+
+<div class="login">
+  <h1>Register</h1>
+
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      {{ form.as_table }}
+      <tr>
+        <td></td>
+        <td><input type="submit" name="submit" value="Daftar" /></td>
+      </tr>
+    </table>
+  </form>
+
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+{% endblock content %}
+```
+3. Melakukan routing URL dengan import register dan menambahkan path register ke `urlpatterns`
+```python
+from main.views import register
+urlpatterns = [
+    ...
+    path('register/', register, name='register'),
+    ...
+]
+```
+
+4. Membuat form dan fungsi login di `views.py`
+```python
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login
+
+def login_user(request):
+   if request.method == 'POST':
+      form = AuthenticationForm(data=request.POST)
+
+      if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('main:show_main')
+
+   else:
+      form = AuthenticationForm(request)
+   context = {'form': form}
+   return render(request, 'login.html', context)
+```
+
+5. Membuat template baru bernama `login.html`
+```html
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Login</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="login">
+  <h1>Login</h1>
+
+  <form method="POST" action="">
+    {% csrf_token %}
+    <table>
+      {{ form.as_table }}
+      <tr>
+        <td></td>
+        <td><input class="btn login_btn" type="submit" value="Login" /></td>
+      </tr>
+    </table>
+  </form>
+
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %} Don't have an account yet?
+  <a href="{% url 'main:register' %}">Register Now</a>
+</div>
+
+{% endblock content %}
+```
+
+6. Melakukan routing URL dengan import login dan menambahkan url login ke `urlpatterns`
+```python
+from main.views import login_user
+
+urlpatterns = [
+   ...
+   path('login/', login_user, name='login'),
+]
+```
+
+7. Membuat form dan fungsi logout di `views.py`
+```python
+from django.contrib.auth import logout
+
+def logout_user(request):
+    logout(request)
+    return redirect('main:login')
+```
+
+8. Tambahkan kode untuk membuat tombol logout di `main.html`
+```html
+...
+<a href="{% url 'main:logout' %}">
+  <button>Logout</button>
+</a>
+...
+```
+
+9. Melakukan routing url dengan import logout_user dan menambahkan path logout_user ke urlpatterns
+```python
+urlpatterns = [
+   ...
+   path('logout/', logout_user, name='logout'),
+]
+```
+
+10. Merestriksi akses halaman main dengan cara import `login_required` dan menambahkan kode di atas `show_main`
+```python
+from django.contrib.auth.decorators import login_required
+...
+@login_required(login_url='/login')
+def show_main(request):
+...
+```
+
+11. Membuat dua akun pengguna dengan masin-masing tiga dummy data untuk mengisi database
+
+### Menerapkan cookies untuk menampilkan `last login`
+1. Menambahkan import `HttpResponseRedirect`, `reverse`, dan `datetime` kemudian tambahkan fungsionalitas cookie pada fungsi `login_user`
+```python
+import datetime
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+...
+if form.is_valid():
+    user = form.get_user()
+    login(request, user)
+    response = HttpResponseRedirect(reverse("main:show_main"))
+    response.set_cookie('last_login', str(datetime.datetime.now()))
+    return response
+...
+```
+
+2. Tambahkan kode untuk menampilkan informasi cookie `last_login` pada fungsi `show_main`
+```python
+    context = {
+        'app_name' : 'Pro Shop',
+        'name': 'Fadhli Raihan Ardiansyah',
+        'class': 'PBP D',
+        'products' : product_entries,
+        'last_login': request.COOKIES['last_login'],
+    }
+```
+
+3. Ubah fungsi `logout_user()` agar menghapus cookie `last_login` saat pengguna logout
+```python
+def logout_user(request):
+    logout(request)
+    response = HttpResponseRedirect(reverse('main:login'))
+    response.delete_cookie('last_login')
+    return response
+```
+
+4. Tambahkan kode html di `main.html` agar data last login ditampilkan
+```html
+...
+<h5>Sesi terakhir login: {{ last_login }}</h5>
+...
+```
+### Menghubungkan model `Product` dan `User`
+1. tambahkan Import model User di `models.py` kemudian pada model `ProductEntry` tambahkan kode untuk menghubungkan user dengan produk
+```python
+from django.contrib.auth.models import User
+...
+class ProductEntry(models.Model):
+    ...
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+```
+
+2. Buka `views.py` dan ubah kode pada fungsi `create_product_entry` menjadi berikut:
+```python
+def create_product_entry(request):
+    form = ProductForm(request.POST or None)
+
+    if form.is_valid() and request.method == "POST":
+        product_entry = form.save(commit=False)
+        product_entry.user = request.user
+        product_entry.save()
+        return redirect('main:show_main')
+
+    context = {'form': form}
+    return render(request, "create_product_entry.html", context)
+```
+
+3. Ubah value `product_entries` dan `context` agar menampilkan nama dan objek `product` yang terasosiasikan dengan user
+```python
+def show_main(request):
+    product_entries = ProductEntry.objects.filter(user=request.user)
+    context = {
+        'app_name' : 'Pro Shop',
+        'name': request.user.username,
+        'class': 'PBP D',
+        'products' : product_entries,
+        'last_login': request.COOKIES['last_login'],
+    }
+    return render(request, "main.html", context)
+```
+4. Lakukan migrasi model dan tetapkan default value pada field user
+
+5. Siapkan aplikasi web untuk environment production dengan import os dan mengganti variabel DEBUG di `settings.py`
+```python
+import os
+...
+PRODUCTION = os.getenv("PRODUCTION", False)
+DEBUG = not PRODUCTION
+```
+
+</details>
