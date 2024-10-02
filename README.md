@@ -725,3 +725,150 @@ DEBUG = not PRODUCTION
 ```
 
 </details>
+
+<details>
+<summary> Tugas 5: Desain Web menggunakan HTML, CSS, dan Framework CSS </summary>
+
+## Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut!
+
+Urutan prioritas CSS selector menggunakan scoring point dengan spesifikasi berikut:
+
+a. Universal selector (`*`) = 0 poin
+
+b. Elemen, Pseudo-elemen (e.g. `h1`)= 1 poin
+
+c. CLass, pseudo-class, attribut (e.g. `.my-class`)= 10 poin
+
+d. ID Selector (e.g. `#myID`) = 100 poin
+
+e. Inline Style (e.g. `<p style="color: pink;">`) = 1000 poin
+
+f. `!important` rule = tidak mempunyai poin spesifik tapi akan mengoverride semua selector lain
+
+## Mengapa responsive design menjadi konsep yang penting dalam pengembangan aplikasi web? Berikan contoh aplikasi yang sudah dan belum menerapkan responsive design!
+
+Responsive design akan memberikan pengguna pengalaman yang konsisten apapun perangkat yang mereka gunakan. Selain itu dengan desain responsive developer tidak perlu membuat versi web terpisah untuk desktop dan mobile.
+
+Contoh aplikasi yang sudah menerapkan responsive design:
+
+1. Facebook
+2. Tokopedia
+3. Shopee
+
+Contoh aplikasi yang belum menerapkan responsive design:
+
+1. Beberapa situs web pemerintah terutama yang sudah lama umurnya
+2. Reddit (versi lama)
+
+## Jelaskan perbedaan antara margin, border, dan padding, serta cara untuk mengimplementasikan ketiga hal tersebut!
+
+Margin. border, dan padding digunakan untuk mengatur tata letak dan ruang antara elemen pada halaman web. Ketiganya mempunyai fungsi masing-masing.
+
+Margin menentukan jarak ruang kosong antara elemen satu dan lainnya di halaman web
+
+Cara implementasi:
+```css
+.element {
+    margin: 20px;
+}
+```
+
+
+Border adalah garis yang mengelilingi elemen dan terletak di antara padding dan margin. Border berfungsi sebagai batas antara elemen dan area sekitarnya.
+
+Cara implementasi:
+```css
+.element {
+    border: 2px solid black;
+}
+```
+
+Padding adalah ruang di dalam elemen di antara margin dan border. Padding berfungsi untuk menambah jarak antara elemen dan batas di sekitarnya.
+
+Cara implementasi:
+```css
+.element {
+    padding: 20px;
+}
+```
+
+## Jelaskan konsep flex box dan grid layout beserta kegunaannya!
+Flexbox adalah sistem layout di CSS yang berguna untuk mengatur elemen secara horizontal dan vertikal.
+
+Grid layout adalah sistem layout yang membagi kolom pada suatu website menjadi beberapa bagian. Grid layout berfungsi untuk mengatur tata letka halaman secara lebih terstruktur dan kompleks.
+
+## Step-by-step implementasi checklist
+
+### Implementasi fungsi untuk menghapus dan mengedit produk
+
+1. Tambahkan fungsi `edit_product` di `views.py`
+```python
+def edit_product(request, id):
+    product = ProductEntry.objects.get(pk = id)
+
+    form = ProductForm(request.POST or None, instance=product)
+
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return HttpResponseRedirect(reverse('main:show_main'))
+
+    context = {'form': form}
+    return render(request, "edit_product.html", context)
+```
+
+2. Tambahkan import `reverse` dan `HTTPResponseRedirect` di file yang sama
+```python
+from django.shortcuts import .., reverse
+from django.http import .., HttpResponseRedirect
+```
+
+3. Menambahkan `edit_product.html` dengan menerapkan styling
+
+4. import fungsi `edit_product` di `urls.py` dan tambahkan path urlnya ke `urlpatterns`
+
+5. Pada `main.html` tambahkan tombol untuk mengedit produk
+
+6. Tambahkan fungsi `delete_product` pada views.py
+```python
+def delete_product(request, id):
+    product = ProductEntry.objects.get(pk = id)
+    product.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))
+```
+7. Import fungsi `delete_product` ke dalam `urls.py`
+dan tambahkan path url ke `urlpatterns`
+
+8. Tambahkan tombol untuk menghapus produk di `main.html`
+
+### Kustomisasi halaman product menjadi lebih menarik dan responsive
+1. Tambahkan middleware WhiteNoise di `settings.py`
+2. Konfigurasi variabel berikut di file yang sama
+```python
+...
+STATIC_URL = '/static/'
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static' 
+    ]
+else:
+    STATIC_ROOT = BASE_DIR / 'static'
+...
+```
+3. Membuat folder `global.css` di direktori `static/css`
+
+4. Modifikasi file `base.html` untuk menambahkan file `global.css` ke dalamnya
+
+5. Tambahkan beberapa styling di dalam `global.css` seperti warna untuk focus input
+
+6. Aplikasikan styling ke halaman login, register, dan home
+
+7. Membuat file `card_product.html` dan aplikasikan styling serta kode yang diperlukan
+
+8. Masukkan foto ke dalam folder baru `static/images` yang akan ditampilkan saat produk masih kosong
+
+9. Modifikasi `main.html` untuk memasukkan semua file html yang telah dibuat tadi
+
+10. Tambahkan styling ke file `create_mood_entry.html` dan `edit_product.html`
+
+11. Buat file `navbar.html` yang berisi tautan ke halaman-halaman lain kemudian tambahkan styling
+</details>

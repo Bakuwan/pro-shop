@@ -9,3 +9,4 @@ class ProductEntry(models.Model):
     price = models.IntegerField(default=0)
     description = models.TextField(default="")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
