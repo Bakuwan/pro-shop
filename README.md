@@ -872,3 +872,50 @@ else:
 
 11. Buat file `navbar.html` yang berisi tautan ke halaman-halaman lain kemudian tambahkan styling
 </details>
+
+<details>
+<summary> Tugas 6: Tugas 6: JavaScript dan AJAX
+</summary>
+
+## Jelaskan manfaat dari penggunaan JavaScript dalam pengembangan aplikasi web!
+1. Menambah elemen interaktif di web
+
+2. Meningkatkan kinerja aplikasi karena dengan JavaScript sebagian pemrosesan dapat dilakukan di sisi klien sehingga mengurangi beban server
+
+3. JavaScript didukung oleh banyak library dan framework sehingga memudahkan pengembangan
+
+4. JavaScript memungkinkan pemrograman asynchronous yang memudahkan pengelolaan operasi yang memakan waktu tanpa menghalangi pengalaman pengguna
+
+5. JavaScript memudahkan integrasi dengan berbagai API
+
+## Jelaskan fungsi dari penggunaan `await` ketika kita menggunakan `fetch()`! Apa yang akan terjadi jika kita tidak menggunakan `await`?\
+
+Fungsinya adalah untuk menunggu hasil dari operasi asynchronous sebelum melanjutkan ke kode berikutnya. Jika tidak menggunakan `await` maka eksekusi kode akan terus berlanjut tanpa menunggu respons dari `fetch()` sehingga kita mungkin tidak mendapatkan data respons yang diperlukan.
+
+## Mengapa kita perlu menggunakan decorator `csrf_exempt` pada view yang akan digunakan untuk AJAX POST?
+
+Karena di AJAX POST kita tidak mengirimkan token CSRF sehingga jika tidak menggunakan decorator `csrf_exempt` secara otomatis permintaan akan ditolak oleh server
+
+## Pada tutorial PBP minggu ini, pembersihan data input pengguna dilakukan di belakang (backend) juga. Mengapa hal tersebut tidak dilakukan di frontend saja?
+
+Karena jika kita melakukan pembersihan di backend, masih terdapat celah keamanan yang dapat dimanfaatkan oleh penyerang
+
+## Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!
+
+### AJAX GET
+1. Modifikasi kode di `views.py` agar kita mengambil objek produk dari endpoint `/json`
+2. Ubah blok kode kondisional di `main.html` dengan berikut:
+```html
+<div id="mood_entry_cards"></div>
+```
+3. Buat blok `<script>` dan tambahkan fungsi `getProductEntries` di dalamnya
+4. Buat fungsi `refreshProductEntries` di dalam blok tadi yang berfungsi untuk menampilkan produk terbaru tanpa reload halaman
+
+### AJAX POST
+1.  Import `csrf_exempt` dan `require_POST` pada `views.py`
+2. Buat fungsi baru di `views.py` dengan nama `add_product_entry_AJAX`
+3. Tambahkan routing fungsi tadi ke `urls.py`
+4. Tambahkan kode untuk membuat modal sebagai form
+5. Tambahkan kode javascript untuk mendukung modal tersebut
+6. Tambahkan tombol untuk melakukan penambahan produk dengan AJAX
+</details>
